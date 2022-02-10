@@ -19,7 +19,7 @@ export class RecipeService {
   }
 
   getRecipes() {
-    return this.recipes.slice();
+    return this.recipes.slice();   // returning just the copy of array, using splice fn
   }
 
   getRecipe(index: number) {

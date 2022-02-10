@@ -7,8 +7,8 @@ export class User {
     ) {}
   
     get token() {
-      if (!this._tokenExpirationDate || new Date() > this._tokenExpirationDate) {
-        return '';
+      if (!this._tokenExpirationDate || new Date() > this._tokenExpirationDate) {  // if token idoesn't exist or the token has expired
+        return '' ;
       }
       return this._token;
     }

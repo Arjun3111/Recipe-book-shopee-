@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
-import { throwError, BehaviorSubject ,ReplaySubject } from 'rxjs';
-
+import { throwError, BehaviorSubject} from 'rxjs';
 import { User } from './user.model';
+import { Router } from '@angular/router';
 
 export interface AuthResponseData {
   kind: string;
@@ -18,7 +17,8 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  user = new BehaviorSubject<User | null>(null) ;
+
+  user = new BehaviorSubject<User | null>(null);
   private tokenExpirationTimer: any;
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -26,7 +26,7 @@ export class AuthService {
   signup(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyDyPaP4_vJKO-DVGpAinxMsI0mJFOi3L3w',
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDyPaP4_vJKO-DVGpAinxMsI0mJFOi3L3w',
         {
           email: email,
           password: password,
@@ -40,17 +40,16 @@ export class AuthService {
             resData.email,
             resData.localId,
             resData.idToken,
-            +resData.expiresIn
+            +resData.expiresIn     // '+' sign for converting it into number
           );
         })
       );
   }
 
-
   login(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDyPaP4_vJKO-DVGpAinxMsI0mJFOi3L3w',
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDyPaP4_vJKO-DVGpAinxMsI0mJFOi3L3w',
         {
           email: email,
           password: password,
@@ -64,7 +63,7 @@ export class AuthService {
             resData.email,
             resData.localId,
             resData.idToken,
-            +resData.expiresIn
+            +resData.expiresIn     // '+' sign for converting it into number
           );
         })
       );
@@ -80,7 +79,7 @@ export class AuthService {
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
     this.autoLogout(expiresIn * 1000);
-    localStorage.setItem('userData', JSON.stringify(user));
+    localStorage.setItem('userData', JSON.stringify(user));  // 'userData' name is given by us, which is basically a key with which we can retrieve it later
   }
 
   autoLogin() {
@@ -90,6 +89,7 @@ export class AuthService {
       _token: string;
       _tokenExpirationDate: string;
     } = JSON.parse(localStorage.getItem('userData') || '{}');
+
     if (!userData) {
       return;
     }
@@ -110,7 +110,6 @@ export class AuthService {
     }
   }
 
-
   logout() {
     this.user.next(null);
     this.router.navigate(['/auth']);
@@ -125,7 +124,7 @@ export class AuthService {
     this.tokenExpirationTimer = setTimeout(() => {
       this.logout();
     }, expirationDuration);
-  } 
+  }
 
   private handleError(errorRes: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred!';
